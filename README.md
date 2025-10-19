@@ -13,13 +13,17 @@
 	```bash
 	npm install
 	```
-3. **Jalankan server**
+3. **Buat .env dan isi sesuai .env.example**
+	```bash
+	GEMINI_API_KEY=<your api key>
+	```
+4. **Jalankan server**
 	```bash
 	npm run start
 	# atau
 	node index.js
 	```
-4. **Buka di browser**
+5. **Buka di browser**
 	Kunjungi [http://localhost:3000](http://localhost:3000)
 
 ## Fitur Utama
