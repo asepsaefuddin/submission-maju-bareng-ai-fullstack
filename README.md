@@ -7,7 +7,7 @@
 1. **Clone repo ini**
 	```bash
 	git clone https://github.com/asepsaefuddin/submission-maju-bareng-ai-fullstack.git
-	cd fullstack
+	cd submission-maju-bareng-ai-fullstack
 	```
 2. **Install dependencies**
 	```bash
