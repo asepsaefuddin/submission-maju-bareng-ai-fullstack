@@ -5,14 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gemini AI Chatbot</title>
   <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </head>
 <body>
+  <div class="bubbles">
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+  </div>
   <div class="container">
-    <h1>Gemini AI Chatbot</h1>
+    <h1>Asep AI Chatbot</h1>
     <div id="chat-box" class="chat-box"></div>
-    <form id="chat-form">
-      <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" required />
-      <button type="submit">Send</button>
+    <div id="doc-preview-wrapper" style="display:none">
+      <div class="doc" style="display:flex;align-items:center;gap:10px;background:rgba(40,40,60,0.92);border-radius:14px;padding:8px 18px;margin:10px 0 18px 0;box-shadow:0 2px 12px rgba(0,0,0,0.10);font-size:1.08em;color:#f3f3f3;font-weight:500;min-height:36px;min-width:120px;transition:background 0.2s;">
+        <span style="font-size:1.4em;">📄</span>
+        <span class="doc-filename">asepsan</span>
+      </div>
+    </div>
+    <form id="chat-form" class="chat-input-area">
+      <div style="position: relative;">
+        <button type="button" class="icon-button" id="upload-btn" title="Upload File">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+        </button>
+        <div id="upload-bubble-menu" style="display:none; position:absolute; bottom:60px; left:0; z-index:10; background:#232323; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.18); padding:12px 0; min-width:180px;">
+          <button type="button" id="upload-image-btn" style="display:flex;align-items:center;width:100%;background:none;border:none;color:#fff;padding:10px 20px;gap:12px;cursor:pointer;">
+            <span style="font-size:1.5em;">🖼️</span>
+            <span>
+              <span style="font-weight:500;">Gambar</span><br>
+              <span style="font-size:0.85em;color:#aaa;">Upload Image</span>
+            </span>
+          </button>
+          <button type="button" id="upload-file-btn" style="display:flex;align-items:center;width:100%;background:none;border:none;color:#fff;padding:10px 20px;gap:12px;cursor:pointer;">
+            <span style="font-size:1.5em;">📄</span>
+            <span>
+              <span style="font-weight:500;">Dokumen</span><br>
+              <span style="font-size:0.85em;color:#aaa;">Upload File</span>
+            </span>
+          </button>
+          <button type="button" id="upload-audio-btn" style="display:flex;align-items:center;width:100%;background:none;border:none;color:#fff;padding:10px 20px;gap:12px;cursor:pointer;">
+            <span style="font-size:1.5em;">🎵</span>
+            <span>
+              <span style="font-weight:500;">Audio</span><br>
+              <span style="font-size:0.85em;color:#aaa;">Upload Audio</span>
+            </span>
+          </button>
+        </div>
+        <input type="file" id="file-image-input" accept="image/*" style="display:none" />
+  <input type="file" id="file-doc-input" accept=".pdf,.docx,.xlsx,.csv,.pptx,.txt" style="display:none" />
+        <input type="file" id="file-audio-input" accept="audio/*" style="display:none" />
+      </div>
+      <button type="button" class="icon-button" id="mic-btn" title="Use Microphone">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+      </button>
+      <input type="text" id="user-input" placeholder="Ketik pesan Anda di sini..." autocomplete="off" />
+      <button type="submit" class="icon-button" id="send-btn" title="Send Message">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
     </form>
   </div>
   <script src="script.js"></script>

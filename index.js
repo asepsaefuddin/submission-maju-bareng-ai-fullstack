@@ -105,13 +105,74 @@ app.post('/generate-from-image', upload.single('image'), async (req, res) => {
 
 app.post('/generate-from-document', upload.single('document'), async (req, res) => {
     const { prompt } = req.body;
-    const base64Document = req.file.buffer.toString('base64');
     try {
+        const ext = (req.file.originalname.split('.').pop() || '').toLowerCase();
+        let textContent = '';
+        console.log('Received document upload:', req.file.originalname, 'type:', ext);
+        if (ext === 'pdf') {
+            // PDF tetap base64
+            const base64Document = req.file.buffer.toString('base64');
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: [
+                    { text: prompt ?? "Tolong buat ringkasan dari dokumen berikut", type: 'text' },
+                    { inlineData: { data: base64Document, mimeType: req.file.mimetype } }
+                ],
+                config: {
+                    systemInstruction: "Buat ringkasan dokumen secara singkat dan jelas (bahasa Indonesia)."
+                }
+            });
+            res.status(200).json({
+                success: true,
+                message: 'Dokumen berhasil diringkas',
+                data: response.text
+            });
+            return;
+        } else if (ext === 'docx') {
+            const mammoth = (await import('mammoth')).default;
+            const result = await mammoth.convertToHtml({ buffer: req.file.buffer });
+            textContent = result.value.replace(/<[^>]+>/g, ' ');
+        } else if (ext === 'xlsx') {
+            const XLSX = (await import('xlsx')).default;
+            const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+            textContent = workbook.SheetNames.map(sheet => XLSX.utils.sheet_to_csv(workbook.Sheets[sheet])).join('\n');
+        } else if (ext === 'csv') {
+            textContent = req.file.buffer.toString('utf-8');
+        } else if (ext === 'pptx') {
+            try {
+                const { default: officeparser } = await import('officeparser');
+                const fs = await import('fs/promises');
+                const os = await import('os');
+                const path = await import('path');
+                // Save buffer to temp file
+                const tmpPath = path.default.join(os.default.tmpdir(), `upload-${Date.now()}.pptx`);
+                await fs.writeFile(tmpPath, req.file.buffer);
+                textContent = await new Promise((resolve, reject) => {
+                    officeparser.parseOffice(tmpPath, (data, err) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(data);
+                        }
+                    });
+                });
+                await fs.unlink(tmpPath);
+                if (!textContent) throw new Error('Tidak bisa mengekstrak teks dari PPTX');
+            } catch (pptxErr) {
+                console.error('Error parsing PPTX:', pptxErr);
+                throw new Error('Gagal memproses file PPTX: ' + pptxErr.message);
+            }
+        } else if (ext === 'txt') {
+            textContent = req.file.buffer.toString('utf-8');
+        } else {
+            throw new Error('Format dokumen tidak didukung');
+        }
+        // Kirim ke Gemini sebagai teks
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: [
                 { text: prompt ?? "Tolong buat ringkasan dari dokumen berikut", type: 'text' },
-                { inlineData: { data: base64Document, mimeType: req.file.mimetype } }
+                { text: textContent, type: 'text' }
             ],
             config: {
                 systemInstruction: "Buat ringkasan dokumen secara singkat dan jelas (bahasa Indonesia)."
@@ -123,10 +184,10 @@ app.post('/generate-from-document', upload.single('document'), async (req, res) 
             data: response.text
         });
     } catch (error) {
-        console.error(error);
+        console.error('Error processing document:', error);
         res.status(500).json({
             success: false,
-            message: 'Terjadi kesalahan saat memproses dokumen',
+            message: error.message || 'Terjadi kesalahan saat memproses dokumen',
             data: null
         });
     }
@@ -167,13 +228,12 @@ app.post('/api/chat', async (req, res) => {
     const conversation = req.body.conversation || req.body.messages;
     try {
         if (!Array.isArray(conversation)) throw new Error('Conversation harus berupa array');
-        // Map 'content' to 'parts' for Gemini API
         const contents = conversation.map(({ role, content }) => ({ role, parts: [{ text: content }] }));
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents,
             config: {
-                systemInstruction: "Kamu adalah asisten yang ramah dan membantu."
+                systemInstruction: "Kamu adalah asisten yang ramah dan membantu dan nama kamu adalah asep sang raja iblis."
             }
         });
         res.status(200).json({

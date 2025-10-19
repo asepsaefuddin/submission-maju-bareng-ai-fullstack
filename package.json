@@ -10,14 +10,17 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  
   "description": "",
   "dependencies": {
     "@google/genai": "^1.25.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "multer": "^2.0.2"
+    "mammoth": "^1.11.0",
+    "multer": "^2.0.2",
+    "officeparser": "^5.2.1",
+    "pptx-parser": "^1.1.7-beta.9",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
