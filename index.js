@@ -251,32 +251,6 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-app.post('/api/chat-stream', async (req, res) => {
-    const { conversation } = req.body;
-    try {
-        if (!Array.isArray(conversation)) throw new Error('Conversation harus berupa array');
-
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-
-        const contents = conversation.map(({ role, content }) => ({ role, parts: [{ text: content }] }));
-        const result = await ai.models.generateContentStream({
-            model: 'gemini-2.5-flash',
-            contents,
-        });
-
-        for await (const chunk of result.stream) {
-            res.write(`data: ${JSON.stringify({ result: chunk.text() })}\n\n`);
-        }
-    } catch (error) {
-        console.error('Streaming Error:', error);
-        res.write(`data: ${JSON.stringify({ error: 'An error occurred during streaming.' })}\n\n`);
-    } finally {
-        res.end();
-    }
-});
-
 app.listen(3000, () => {
     console.log('I LOVE YOU 3000');
 });
